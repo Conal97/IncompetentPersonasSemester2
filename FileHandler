@@ -40,6 +40,16 @@ public class FileHandler {
         for (String string : parsedTeachers) {
             System.out.println(string);
         }
+
+        // Parse the courses
+        ArrayList<String> parsedCourses = fileHandler.parseCourses(array);
+
+        // Testing expected output -> "English 2 English"
+        //                         -> "Science 2 Maths,Science "
+
+        for (String courseString : parsedCourses) {
+            System.out.println(courseString);
+        }
     }
     
     // Constructor
@@ -76,13 +86,13 @@ public class FileHandler {
 
                 // Access individual teacher object
                 JSONObject outerTeacherObject = teacherArray.getJSONObject(i);
-                JSONObject inner = outerTeacherObject.getJSONObject("Teacher");
+                JSONObject innerTeacherObject = outerTeacherObject.getJSONObject("Teacher");
 
                 // Parse teacher name
-                String name = inner.getString("Name");
+                String name = innerTeacherObject.getString("Name");
 
                 // Parsing teacher training
-                JSONArray trainingArray = inner.getJSONArray("TrainingAttended");
+                JSONArray trainingArray = innerTeacherObject.getJSONArray("TrainingAttended");
                 String trainingAttended = "";
 
                 // Iterator over training array
@@ -94,6 +104,7 @@ public class FileHandler {
                     trainingAttended += ("," + it.next());
                 }
 
+                // Formatting string for object creation and adding to string ArrayList
                 String outStream = String.format("%s %s", name, trainingAttended);
                 parsedTeachers.add(outStream);  
             }  
@@ -101,6 +112,44 @@ public class FileHandler {
     }
 
     // Parse courses
+    public static ArrayList<String> parseCourses(JSONArray array) {
+
+        ArrayList<String> parsedCourses = new ArrayList<String>();
+       
+        // Seoncd element of JSONArray input is the list of courses objects
+        JSONArray courseArray = array.getJSONArray(1);
+
+        for (int i = 0; i < courseArray.length(); i++) {
+
+            // Access individual course object
+            JSONObject outerCourseObject = courseArray.getJSONObject(i);
+            JSONObject innerCourseObject = outerCourseObject.getJSONObject("Course");
+            
+            // Parse course name
+            String name = innerCourseObject.getString("CourseName");
+            
+            // Parse number of teachers
+            int NumStaff = innerCourseObject.getInt("NumStaff");
+
+            // Parse training required
+            JSONArray requiredTrainingArray = innerCourseObject.getJSONArray("TrainingRequired");
+            String requiredTraining ="";
+
+            // Iterator over training array
+            Iterator<Object> it = requiredTrainingArray.iterator();
+            if (it.hasNext()) {
+                requiredTraining += it.next();
+            }
+            while (it.hasNext()) {
+                requiredTraining += ("," + it.next());
+            }
+
+            // Formatting string for object creation and adding to string ArrayList
+            String outStream = String.format("%s %d %s", name, NumStaff, requiredTraining);
+            parsedCourses.add(outStream);  
+        }
+        return parsedCourses;
+    }
 
     // Write updated courses (assigned teachers)
 
@@ -201,8 +250,8 @@ public class FileHandler {
         
         // Add courses to the list
         JSONArray courseList = new JSONArray();
-        courseList.put(courseDetails1);
-        courseList.put(courseDetails2);
+        courseList.put(courseObject);
+        courseList.put(courseObject2);
 
         // Wrap in object
         JSONObject courseListObject = new JSONObject();
@@ -230,4 +279,3 @@ public class FileHandler {
         }
     }
 }
-
