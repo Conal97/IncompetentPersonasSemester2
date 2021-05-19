@@ -12,13 +12,18 @@ import com.google.gson.JsonParser;
 import org.json.*;
 import org.json.simple.parser.JSONParser;
 
+
+
 // **** Read me ***
 // Need to add org.json, org.json.simple & gson libraries via Jar file dependency to run code
+
+// TO DO:
+// Implement singelton pattern?
 
 public class FileHandler {
     
     // FileHandler Attributes
-    String jsonFile;
+    private String jsonFile;
 
     // Main to test
     public static void main(String[] args) {
@@ -52,9 +57,19 @@ public class FileHandler {
         ArrayList<Teacher> eachTeacher = teachers.getTeachers();
         Teacher testTeacher = eachTeacher.get(0);
         testTeacher.addCourseToAttend("Science");
+        testTeacher.addCourseToAttend("Geography");
 
-        // Testing updateTeachers -> want that 'Science' has been added to the 'TrainingToAttend' array of Alice
-        fileHandler.updateTeachers(teachers, array);
+        // Testing updateTeachers -> want that 'Science' & 'Geography' have been added to the 'TrainingToAttend' array of Alice
+        fileHandler.updateTeacherTrainingToAttend(teachers, array);
+
+        // Hard coding a course who's been assigned a teacher
+        CourseList courses = new CourseList(parsedCourses);
+        ArrayList<Course> eachCourse = courses.getCourses();
+        Course testCourse = eachCourse.get(0);
+        testCourse.addTeacher(testTeacher);
+
+        // Testing updateCourse
+        fileHandler.updateCourseTrainingAssinged(courses, array);
     }
     
     // Constructor
@@ -158,7 +173,7 @@ public class FileHandler {
     }
 
     // Update JSON file with teachers where training has been assigned
-    public void updateTeachers(TeacherList LoT, JSONArray array) {
+    public void updateTeacherTrainingToAttend(TeacherList LoT, JSONArray array) {
 
         // Access the array list that holds the teachers
         ArrayList<Teacher> teachers = LoT.getTeachers();
@@ -184,31 +199,83 @@ public class FileHandler {
                     // Access trainingRequired JSONArray of inner teacher
                     JSONArray trainingRequired = innerTeacherObject.getJSONArray("TrainingToAttend");
 
-                    // Update trainingRequired based on the teacher object
+                    // Get array of string of training to attend
                     ArrayList<String> trainingToAttend = teacher.getTrainingToAttend();
 
+                    // Check if field of current teacher object is null
                     if (teacher.getTrainingToAttend().isEmpty()) {
                         continue;
                     }
+                    // If not null, update json object with java object data
                     else {
                         for (String string : trainingToAttend) {
-                            System.out.println(string);
                             trainingRequired.put(string);
                         } 
-                    }    
-                    
+                    }        
                 }
             }
         } 
-
         // Update the file
         this.writePrettyJson(array); 
     }
 
-    // Update JSON file with courses where teachers have been assigned -> to do
+    // Update JSON file with courses where teachers have been assigned 
+    public void updateCourseTrainingAssinged(CourseList LoC, JSONArray array) {
+
+        // Access the array list that holds the courses
+        ArrayList<Course> courses = LoC.getCourses();
+
+        // Access the courses JSONArray
+        JSONArray courseArray = array.getJSONArray(1);
+
+        // Compare each tcourse object to each course in the JSONArray
+        for (Course course : courses) {
+
+            // Iterate over course list
+            for (int i = 0; i < courseArray.length(); i++) {
+
+                // Access individual course object
+                JSONObject outerCourseObject = courseArray.getJSONObject(i);
+                JSONObject innerCourseObject = outerCourseObject.getJSONObject("Course");
+
+                // Parse course name
+                String name = innerCourseObject.getString("CourseName");
+                
+                if (course.getName().equals(name)) {
+                    
+                    // Access teachers assigned JSONArray of inner course json object
+                    JSONArray TeachersAssigned = innerCourseObject.getJSONArray("TeachersAssigned");
+
+                    // Get array of teacher objects of teachers asssigned to current course
+                    ArrayList<Teacher> teacherOnCourse = course.getTeachers();
+
+                    // Check if teachers assigned field of teacher object is empty
+                    if (course.getTeachers().isEmpty()) {
+                        continue;
+                    }
+                    // Update JSON course object with Java object data
+                    else {
+                        for (Teacher teacher : teacherOnCourse) {
+
+                            // Gson instance to convert from Java object to string
+                            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                            String teacherString = gson.toJson(teacher);
+
+                            // Insert into course JSON array
+                            TeachersAssigned.put(teacherString);
+                        } 
+                    }      
+                }
+            }
+        } 
+        // Update the file
+        this.writePrettyJson(array); 
+    }
 
     // Write JSON string helper method
-    public void writePrettyJson(JSONArray array) {
+    public void writePrettyJson(JSONArray array) { 
+
+        @SuppressWarnings("deprecated")
 
          // Making the file look nice
          Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -338,4 +405,3 @@ public class FileHandler {
         this.writePrettyJson(teacherAndCourseList);
     }
 }
-
