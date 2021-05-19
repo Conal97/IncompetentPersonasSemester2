@@ -12,11 +12,12 @@ import com.google.gson.JsonParser;
 import org.json.*;
 import org.json.simple.parser.JSONParser;
 
-// Read me
-// Need to add org.json, org.json.simple & gson libraries via Jar files to run code
+// **** Read me ***
+// Need to add org.json, org.json.simple & gson libraries via Jar file dependency to run code
 
 public class FileHandler {
     
+    // FileHandler Attributes
     String jsonFile;
 
     // Main to test
@@ -37,23 +38,28 @@ public class FileHandler {
         // Testing expected output -> "Alice English,Maths"
         //                         -> "Bob English, Science"
         //                         -> "Charlie Maths,Science"
-        for (String string : parsedTeachers) {
-            System.out.println(string);
-        }
+        for (String string : parsedTeachers) System.out.println(string);
 
         // Parse the courses
         ArrayList<String> parsedCourses = fileHandler.parseCourses(array);
 
         // Testing expected output -> "English 2 English"
         //                         -> "Science 2 Maths,Science "
+        for (String courseString : parsedCourses) System.out.println(courseString); 
 
-        for (String courseString : parsedCourses) {
-            System.out.println(courseString);
-        }
+        // Hard coding a teacher who's been assigned training to test teacher update method
+        TeacherList teachers = new TeacherList(parsedTeachers);
+        ArrayList<Teacher> eachTeacher = teachers.getTeachers();
+        Teacher testTeacher = eachTeacher.get(0);
+        testTeacher.addCourseToAttend("Science");
+
+        // Testing updateTeachers -> want that 'Science' has been added to the 'TrainingToAttend' array of Alice
+        fileHandler.updateTeachers(teachers, array);
     }
     
     // Constructor
     public FileHandler() {
+        // Set file
         this.jsonFile = "TeachingRequirements.json";
     }
 
@@ -74,7 +80,7 @@ public class FileHandler {
     }
    
     // Parse teachers
-    public static ArrayList<String> parseTeachers(JSONArray array) {
+    public ArrayList<String> parseTeachers(JSONArray array) {
 
         ArrayList<String> parsedTeachers = new ArrayList<String>();
        
@@ -112,7 +118,7 @@ public class FileHandler {
     }
 
     // Parse courses
-    public static ArrayList<String> parseCourses(JSONArray array) {
+    public ArrayList<String> parseCourses(JSONArray array) {
 
         ArrayList<String> parsedCourses = new ArrayList<String>();
        
@@ -151,9 +157,75 @@ public class FileHandler {
         return parsedCourses;
     }
 
-    // Write updated courses (assigned teachers)
+    // Update JSON file with teachers where training has been assigned
+    public void updateTeachers(TeacherList LoT, JSONArray array) {
 
-    // Write updated teachers (assigned training)
+        // Access the array list that holds the teachers
+        ArrayList<Teacher> teachers = LoT.getTeachers();
+
+        // Access the teachers JSONArray
+        JSONArray teacherArray = array.getJSONArray(0);
+
+        // Compare each teacher object to each teacher in the JSONArray
+        for (Teacher teacher : teachers) {
+
+            // Iterate over teacher list
+            for (int i = 0; i < teacherArray.length(); i++) {
+
+                // Access individual teacher object
+                JSONObject outerTeacherObject = teacherArray.getJSONObject(i);
+                JSONObject innerTeacherObject = outerTeacherObject.getJSONObject("Teacher");
+
+                // Parse teacher name
+                String name = innerTeacherObject.getString("Name");
+                
+                if (teacher.getName().equals(name)) {
+                    
+                    // Access trainingRequired JSONArray of inner teacher
+                    JSONArray trainingRequired = innerTeacherObject.getJSONArray("TrainingToAttend");
+
+                    // Update trainingRequired based on the teacher object
+                    ArrayList<String> trainingToAttend = teacher.getTrainingToAttend();
+
+                    if (teacher.getTrainingToAttend().isEmpty()) {
+                        continue;
+                    }
+                    else {
+                        for (String string : trainingToAttend) {
+                            System.out.println(string);
+                            trainingRequired.put(string);
+                        } 
+                    }    
+                    
+                }
+            }
+        } 
+
+        // Update the file
+        this.writePrettyJson(array); 
+    }
+
+    // Update JSON file with courses where teachers have been assigned -> to do
+
+    // Write JSON string helper method
+    public void writePrettyJson(JSONArray array) {
+
+         // Making the file look nice
+         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+         JsonParser jp = new JsonParser();
+         JsonElement je = jp.parse(array.toString());
+         String prettyJsonString = gson.toJson(je);
+ 
+         // Write the JSON file
+         try (FileWriter file = new FileWriter(jsonFile)) {
+             // Write the 'prettyString' to the file
+             file.write(prettyJsonString); 
+             file.flush();
+  
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+    }
 
     // Generate JSON file
     public void fileWrite() {
@@ -257,25 +329,13 @@ public class FileHandler {
         JSONObject courseListObject = new JSONObject();
         courseListObject.put("Courses", courseListObject);
         
-        // JSON array to hold teacher and course lists objects
+        // Wrap teachers and courses in JSON Array
         JSONArray teacherAndCourseList = new JSONArray();
         teacherAndCourseList.put(teacherList);
         teacherAndCourseList.put(courseList);
 
-        // Making the file look nice
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonParser jp = new JsonParser();
-        JsonElement je = jp.parse(teacherAndCourseList.toString());
-        String prettyJsonString = gson.toJson(je);
-
-        // Write the JSON file
-        try (FileWriter file = new FileWriter(jsonFile)) {
-            // Write the 'prettyString' to the file
-            file.write(prettyJsonString); 
-            file.flush();
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Format array and write it
+        this.writePrettyJson(teacherAndCourseList);
     }
 }
+
