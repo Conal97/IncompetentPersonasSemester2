@@ -3,9 +3,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import org.json.JSONArray;
+
 public class TeacherList {
 	
 	private ArrayList<Teacher> LoT;
+
+	public static void main(String[] args) {
+		FileHandler fileHandler = new FileHandler();
+        // Read the file
+        JSONArray array = fileHandler.readFile();
+
+        // Parse the teachers
+        ArrayList<String> parsedTeachers = fileHandler.parseTeachers(array);
+        
+        TeacherList listOFteachers = new TeacherList();
+		listOFteachers.populateTeachers(parsedTeachers);
+
+		// Access the array list that holds the teachers
+        ArrayList<Teacher> teachers = listOFteachers.getTeachers();
+        
+        for (Teacher teacher : teachers){
+			
+			System.out.println(teacher.getTrainingAttended());
+		}
+	}
 	
 	// Constructor 
 	public TeacherList() {
@@ -15,19 +37,21 @@ public class TeacherList {
 	// Populate method -> convert teacher strings from parse teachers to teacher objects and add to LoT
 	public void populateTeachers(ArrayList<String> teachersFromFile) {
 
-		for(String input :teachersFromFile) {
+		for (String input :teachersFromFile) {
         	String line = input;
         	Scanner s = new Scanner(line);
-        	ArrayList<String> training = new ArrayList<String>();
+        	ArrayList<String> trainingAttended = new ArrayList<String>();
         	String name = s.next();
 
-        	while(s.hasNext())
-        		training.add(s.next());
-
-				Teacher t = new Teacher(name,training);
-				this.LoT.add(t);
-				s.close();
+			String[] training = s.next().split(",");
+			for (int i = 0; i < training.length; i++) {
+				trainingAttended.add(training[i]);
 			}
+
+			Teacher t = new Teacher(name,trainingAttended);
+			this.LoT.add(t);
+			s.close();
+		}
 	}
 	
 	//returns the list of teachers
