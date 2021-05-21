@@ -45,7 +45,7 @@ public class Tester {
         testTeacher2.addCourseToAttend("Geography");
 
         // Testing updateTeachers -> want that 'Science' & 'Geography' have been added to the 'TrainingToAttend' array of Alice
-        fileHandler.updateTeacherTrainingToAttend(teachers, array);
+        //fileHandler.updateTeacherTrainingToAttend(teachers, array);
 
         // Hard coding a course who's been assigned a teacher
         CourseList courses = new CourseList();
@@ -59,7 +59,7 @@ public class Tester {
         testCourse.addTeacher(testTeacher);
 
         // Testing updateCourse -> want that 'Alice' teacher object has been added as a teacher to the test course
-        fileHandler.updateCourseTrainingAssinged(courses, array);
+        //fileHandler.updateCourseTrainingAssinged(courses, array);
 
         // ------------------------------------------------------ //
         // Testing the assigner class
@@ -74,5 +74,13 @@ public class Tester {
         // Testing the unassinged teachers method
         ArrayList<String> unassingedTeachers = assigner.unassignedTeachers("English", teachers, courses);
         System.out.println("Unassinged teachers are: " + unassingedTeachers);
+
+        // Testing assign teacher to course & updating JSON file
+        assigner.assignTeacherToCourse("Science", "Charlie", teachers, courses);
+        fileHandler.updateCourseTeacherAssinged(courses, array);
+
+        // Testing assign training to teacher & updating JSON file
+        assigner.assingTeacherTraining("English", "Charlie", teachers, courses);
+        fileHandler.updateTeacherTrainingToAttend(teachers, array);
     }
 }
