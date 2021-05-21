@@ -15,7 +15,18 @@ public class Assigner {
 
         // Training required array to compare course and teacher
         ArrayList<String> trainingRequired = new ArrayList<String>();
-        trainingRequired = matchCourse(courseName, LoC).getTrainingRequired();
+       
+        // Access the array list that holds the courses
+        ArrayList<Course> courses = LoC.getCourses();
+
+        // Match course object with selected course
+        for (Course course : courses) {
+        
+            if (course.getName().equals(courseName)) {
+                // Accesss training required
+                trainingRequired = course.getTrainingRequired();
+            }
+        }
 
         for (Teacher teacher : teachers) {
             
@@ -40,7 +51,18 @@ public class Assigner {
 
         // Teachers assigned to course array to compare course and teacher
         ArrayList<Teacher> teachersOnCourse = new ArrayList<Teacher>();
-        teachersOnCourse = matchCourse(courseName, LoC).getTeachers();
+
+        // Access the array list that holds the courses
+        ArrayList<Course> courses = LoC.getCourses();
+
+        // Match course object with selected course
+        for (Course course : courses) {
+        
+            if (course.getName().equals(courseName)) {
+                // Access teachers on course
+                teachersOnCourse = course.getTeachers();
+            }
+        }
 
         for (Teacher teacher : teachers) {
             
@@ -51,52 +73,99 @@ public class Assigner {
         return unassingedTeachers;
     }
     
-    // Still need to test assign to course and assign training
-
     // Assign teachers to course
     public ArrayList<String> assignTeacherToCourse(String courseName, String teacherName, TeacherList LoT, CourseList LoC) {
         
-        // Set output **** Could just output string straight away???? ****
+        // Set output 
         ArrayList<String> assignedTeachers = new ArrayList<String>();
 
-        // Access selected course and teacher
-        Course course = matchCourse(courseName, LoC);
-        Teacher teacher = matchTeacher(teacherName, LoT);
+        // Access the array list that holds the courses
+        ArrayList<Course> courses = LoC.getCourses();
 
-        // Append teacher to the course
-        course.addTeacher(teacher);
+        // Access the array list that holds the teachers
+        ArrayList<Teacher> teachers = LoT.getTeachers();
 
-        // Append teacher to output and return
-        assignedTeachers.add(course.toString());
+        // Init selected course
+        Course selectedCourse;
+
+        // Init selected teacher
+        Teacher selectedTeacher;
+
+        for (Course course : courses) {
+        
+            if (course.getName().equals(courseName)) {
+
+                // Access matched course
+                selectedCourse = course;
+
+                for (Teacher teacher : teachers) {
+                    
+                    if(teacher.getName().equals(teacherName)) {
+                        
+                        // Access matched teacher
+                        selectedTeacher = teacher;
+
+                        // Append teacher to course
+                        selectedCourse.addTeacher(selectedTeacher);
+
+                        // Append teacger to out
+                        assignedTeachers.add(selectedCourse.toString());
+                    }
+                }
+            }
+        }
         return assignedTeachers;
-
-        // Don't know if outputs work!!!
     }
 
     // Assign teachers training
     public ArrayList<String> assingTeacherTraining(String courseName, String teacherName, TeacherList LoT, CourseList LoC) {
 
-        // Set output **** Could just output string straight away???? ****
+        // Set output 
         ArrayList<String> assignedTraining = new ArrayList<String>();
 
-        // Access selected course and teacher
-        Course course = matchCourse(courseName, LoC);
-        Teacher teacher = matchTeacher(teacherName, LoT);
+        // Access the array list that holds the courses
+        ArrayList<Course> courses = LoC.getCourses();
 
-        // Training required for the course
-        ArrayList<String> requiredTraining = course.getTrainingRequired();
+        // Access the array list that holds the teachers
+        ArrayList<Teacher> teachers = LoT.getTeachers();
 
-        // Determine what training the teacher can take
-        for (String string : requiredTraining) {
 
-            // Check teacher doesn't already have the training and hasn't already been assigned the training
-            if (!teacher.getTrainingAttended().contains(string) && !teacher.getTrainingToAttend().contains(teacher)) {
-                teacher.addCourseToAttend(string);
-                assignedTraining.add(teacher.toString());
+         // Init required training
+         ArrayList<String> requiredTraining;
+
+         // Init selected teacher
+         Teacher selectedTeacher;
+        
+         for (Course course : courses) {
+            // Match selected course
+            if (course.getName().equals(courseName)) {
+
+                // Access matched course
+                requiredTraining = course.getTrainingRequired();
+
+                for (Teacher teacher : teachers) {
+                    // Match selected teacher
+                    if(teacher.getName().equals(teacherName)) {
+                        
+                        // Access matched teacher
+                        selectedTeacher = teacher;
+
+                    // Determine what training the teacher can take
+                    for (String string : requiredTraining) {
+
+                        // Check teacher doesn't already have the training and hasn't already been assigned the training
+                        if (!selectedTeacher.getTrainingAttended().contains(string) && !selectedTeacher.getTrainingToAttend().contains(string)) {
+                            
+                            // Update teacher object and output arraylist
+                            selectedTeacher.addCourseToAttend(string);
+                            assignedTraining.add(selectedTeacher.toString());
+                        }
+                    }
+                    }
+                }
             }
         }
         return assignedTraining;
-        // Don't know if outputs work!!!
     }
 
     // Match teacher helper method
@@ -115,7 +184,6 @@ public class Assigner {
         }
         return null;
     }
-
 
     // Match course helper method
     public Course matchCourse(String courseName, CourseList LoC) {
