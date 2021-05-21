@@ -24,53 +24,6 @@ public class FileHandler {
     
     // FileHandler Attributes
     private String jsonFile;
-
-    // Main to test
-    public static void main(String[] args) {
-        
-        // Create FileHandler Object
-        FileHandler fileHandler = new FileHandler();
-
-        // Write the file
-        fileHandler.fileWrite();
-
-        // Read the file
-        JSONArray array = fileHandler.readFile();
-
-        // Parse the teachers
-        ArrayList<String> parsedTeachers = fileHandler.parseTeachers(array);
-
-        // Testing expected output -> "Alice English,Maths"
-        //                         -> "Bob English, Science"
-        //                         -> "Charlie Maths,Science"
-        for (String string : parsedTeachers) System.out.println(string);
-
-        // Parse the courses
-        ArrayList<String> parsedCourses = fileHandler.parseCourses(array);
-
-        // Testing expected output -> "English 2 English"
-        //                         -> "Science 2 Maths,Science "
-        for (String courseString : parsedCourses) System.out.println(courseString); 
-
-        // Hard coding a teacher who's been assigned training to test teacher update method
-        TeacherList teachers = new TeacherList(parsedTeachers);
-        ArrayList<Teacher> eachTeacher = teachers.getTeachers();
-        Teacher testTeacher = eachTeacher.get(0);
-        testTeacher.addCourseToAttend("Science");
-        testTeacher.addCourseToAttend("Geography");
-
-        // Testing updateTeachers -> want that 'Science' & 'Geography' have been added to the 'TrainingToAttend' array of Alice
-        fileHandler.updateTeacherTrainingToAttend(teachers, array);
-
-        // Hard coding a course who's been assigned a teacher
-        CourseList courses = new CourseList(parsedCourses);
-        ArrayList<Course> eachCourse = courses.getCourses();
-        Course testCourse = eachCourse.get(0);
-        testCourse.addTeacher(testTeacher);
-
-        // Testing updateCourse
-        fileHandler.updateCourseTrainingAssinged(courses, array);
-    }
     
     // Constructor
     public FileHandler() {
@@ -137,7 +90,7 @@ public class FileHandler {
 
         ArrayList<String> parsedCourses = new ArrayList<String>();
        
-        // Seoncd element of JSONArray input is the list of courses objects
+        // Second element of JSONArray input is the list of courses objects
         JSONArray courseArray = array.getJSONArray(1);
 
         for (int i = 0; i < courseArray.length(); i++) {
@@ -199,14 +152,13 @@ public class FileHandler {
                     // Access trainingRequired JSONArray of inner teacher
                     JSONArray trainingRequired = innerTeacherObject.getJSONArray("TrainingToAttend");
 
-                    // Get array of string of training to attend
+                    // Get array of string of training to attend from Java teacher object
                     ArrayList<String> trainingToAttend = teacher.getTrainingToAttend();
 
-                    // Check if field of current teacher object is null
                     if (teacher.getTrainingToAttend().isEmpty()) {
                         continue;
                     }
-                    // If not null, update json object with java object data
+                    // Update json object with java object data
                     else {
                         for (String string : trainingToAttend) {
                             trainingRequired.put(string);
@@ -219,8 +171,8 @@ public class FileHandler {
         this.writePrettyJson(array); 
     }
 
-    // Update JSON file with courses where teachers have been assigned 
-    public void updateCourseTrainingAssinged(CourseList LoC, JSONArray array) {
+    // Update JSON file with courses where teachers have been assigned -> to do
+    public void updateCourseTeacherAssinged(CourseList LoC, JSONArray array) {
 
         // Access the array list that holds the courses
         ArrayList<Course> courses = LoC.getCourses();
@@ -228,7 +180,7 @@ public class FileHandler {
         // Access the courses JSONArray
         JSONArray courseArray = array.getJSONArray(1);
 
-        // Compare each tcourse object to each course in the JSONArray
+        // Compare each course object to each course in the JSONArray
         for (Course course : courses) {
 
             // Iterate over course list
@@ -246,10 +198,9 @@ public class FileHandler {
                     // Access teachers assigned JSONArray of inner course json object
                     JSONArray TeachersAssigned = innerCourseObject.getJSONArray("TeachersAssigned");
 
-                    // Get array of teacher objects of teachers asssigned to current course
+                    // Get teachers that are assigned to the java course object
                     ArrayList<Teacher> teacherOnCourse = course.getTeachers();
 
-                    // Check if teachers assigned field of teacher object is empty
                     if (course.getTeachers().isEmpty()) {
                         continue;
                     }
@@ -258,8 +209,7 @@ public class FileHandler {
                         for (Teacher teacher : teacherOnCourse) {
 
                             // Gson instance to convert from Java object to string
-                            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                            String teacherString = gson.toJson(teacher);
+                            String teacherString = teacher.getName();
 
                             // Insert into course JSON array
                             TeachersAssigned.put(teacherString);
