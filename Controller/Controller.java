@@ -139,8 +139,6 @@ public class Controller implements ActionListener{
 			// If assign teacher to course button is pressed
 			else if (e.getSource()==viewObject.getAssignButton()) {
 
-				int button = 0;
-
 				// Get reference to the assinger, teacherList and courseList
 				Assigner controllerAssigner = modelObject.assigner;
 				TeacherList LoT = modelObject.getTeachers();
@@ -171,8 +169,6 @@ public class Controller implements ActionListener{
 		
 		// If assign training button is pressed
 		else if (e.getSource()==viewObject.getAssignTrainingButton()) {
-
-			int button = 1;
 
 			// Get reference to the assinger, teacherList and courseList
 			Assigner controllerAssigner = modelObject.assigner;
