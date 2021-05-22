@@ -178,38 +178,4 @@ public class Assigner {
         }
         return assignedTraining;
     }
-
-    // Match teacher helper method
-    public Teacher matchTeacher(String teacherName, TeacherList LoT) {
-
-        // Access the array list that holds the teachers
-        ArrayList<Teacher> teachers = LoT.getTeachers();
-
-        // Match teacher with selected teacher
-        for (Teacher teacher : teachers) {
-            
-            if(teacher.getName().equals(teacherName)) {
-                // Return teacher object
-                return teacher;
-            }
-        }
-        return null;
-    }
-
-    // Match course helper method
-    public Course matchCourse(String courseName, CourseList LoC) {
-
-        // Access the array list that holds the courses
-        ArrayList<Course> courses = LoC.getCourses();
-
-        // Match course object with selected course
-        for (Course course : courses) {
-        
-            if (course.getName().equals(courseName)) {
-                // Return course object
-                return course;
-            }
-        }
-        return null; 
-    }
 }
